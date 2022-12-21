@@ -1,0 +1,37 @@
+import csv
+import requests
+from bs4 import BeautifulSoup
+
+# Send an HTTP request to the website
+response = requests.get("https://www.quanthockey.com/nhl/seasons/2019-20-nhl-players-stats.html")
+
+# Parse the HTML content of the response
+soup = BeautifulSoup(response.content, "html.parser")
+soup = BeautifulSoup(response.text, "html.parser")
+# Find the table that contains the player statistics
+
+cells = soup.select('td')
+for cell in cells:
+  print(cell.text.ljust(20), end=' ')
+print()
+
+table = soup.find("table", {"id": "statistics"})
+
+# Create a CSV file
+with open("player_stats.csv", "w", newline="") as csv_file:
+    # Create a CSV writer
+    writer = csv.writer(csv_file)
+    # Write the header row
+    writer.writerow(["Player Name", "Points"])  # Fix: Use quotes to include spaces in column names
+
+    # Iterate through the rows of the table
+    for row in table.find_all("tr"):
+        # Find the cells in the row
+        cells = row.find_all("td")
+        if cells:
+            # Extract the player name and points from the cells
+            name = cells[1].text
+            points = cells[6].text
+            # Write the player name and points to the CSV file
+            writer.writerow([name, points])
+            #print(name)
